@@ -1,0 +1,65 @@
+PUT _ingest/pipeline/traces-apm@custom
+{
+  "description": "Route APM traces to service-specific data streams",
+  "processors": [
+    {
+      "set": {
+        "field": "target_dataset",
+        "value": "apm.{{service.name}}",
+        "override": true
+      }
+    },
+    {
+      "set": {
+        "field": "event.dataset",
+        "value": "apm.{{service.name}}",
+        "override": true
+      }
+    },
+    {
+      "reroute": {
+        "dataset": [
+          "{{target_dataset}}",
+          "apm"
+        ]
+      }
+    }
+  ]
+}
+
+
+PUT _index_template/traces-apm-services
+{
+  "index_patterns": ["traces-apm.*-default"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1
+    },
+    "mappings": {
+      "dynamic": true,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "service": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  },
+  "composed_of": [
+    "traces-apm@package",
+    "traces-apm@custom",
+    ".fleet_globals-1",
+    ".fleet_agent_id_verification-1"
+  ],
+  "priority": 500,
+  "data_stream": {
+    "hidden": false
+  }
+}

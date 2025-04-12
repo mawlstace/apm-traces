@@ -74,3 +74,11 @@ Once the application is running correctly, traces will be captured and stored in
 1. Open Kibana (usually at http://localhost:5601)
 2. Navigate to Observability → APM
 3. Select your service from the Services list
+
+
+### using split_index.text
+
+there is elastic limitation for spliting the index from traces-apm-default to traces-apm-servicename-default where servicename is your application name 
+the idea was to increase the performance of the elasticsearch under heavy apm indices however the elasticsearch has limitation to split from default index 
+however the new indices can be created but the traces cant be seen in ui 
+
